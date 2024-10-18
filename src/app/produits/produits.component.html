@@ -1,0 +1,123 @@
+<div class="">
+  <p-tabMenu
+    [model]="types"
+    [activeItem]="selectedType"
+    (activeItemChange)="selectCategory($event)"
+  />
+
+  <p-card>
+    <p-table
+      [value]="products | filter : category"
+      styleClass="p-datatable-striped"
+      [tableStyle]="{ 'min-width': '50rem' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Name</th>
+          <th class="text-right">Prix</th>
+          <th class="text-right">Prix en promotion</th>
+          <th class="text-center">% promotion</th>
+          <th class="text-center">Type</th>
+          <th class="text-right">Quantité</th>
+          <th class="text-right">Nombre de vente</th>
+          <th class="text-center">Promotion</th>
+          <th>Commentaire</th>
+          <th>
+            @if (edition) {
+            <p-button
+              label="Tout envoyer"
+              ngIf="edition"
+              icon="pi pi-check"
+              severity="success"
+              (click)="saveEdits()"
+            />
+            }
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-product let-i="rowIndex">
+        @if(!productsToEdit[i]){
+        <tr>
+          <td>{{ product.name }} {{ i }}</td>
+          <td class="text-right">{{ product.price }}</td>
+          <td class="text-right">{{ product.discount }}</td>
+          <td class="text-center">
+            <p-knob
+              readonly
+              [(ngModel)]="product.sale_percentage"
+              size="75"
+            ></p-knob>
+          </td>
+          <td class="text-center">
+            @switch (product.category) { @case (0){
+            <p-tag severity="info">Poisson</p-tag> } @case (1) {
+            <p-tag severity="success">Coquillage</p-tag>
+            } @default { <p-tag>Crustace</p-tag> } }
+          </td>
+          <td class="text-right">{{ product.stock }}</td>
+          <td class="text-right">{{ product.unit_sold }}</td>
+          <td class="text-center">
+            <p-inputSwitch readonly [(ngModel)]="product.sale" />
+          </td>
+          <td>{{ product.comments }}</td>
+          <td>
+            <p-button
+              (click)="product.edit = true; addProductToEdit(i, product)"
+              text
+              icon="pi pi-pencil"
+            />
+          </td>
+        </tr>
+        } @else {
+        <tr>
+          <td>{{ productsToEdit[i].name }} {{ i }}</td>
+          <td class="text-right">{{ productsToEdit[i].price }}</td>
+          <td class="text-right">{{ productsToEdit[i].discount }}</td>
+          <td class="text-center">
+            <p-knob
+              [readonly]="!productsToEdit[i].sale"
+              [(ngModel)]="productsToEdit[i].sale_percentage"
+              size="75"
+              step="5"
+              (onChange)="addDiscount(i)"
+            ></p-knob>
+          </td>
+          <td class="text-center">
+            @switch (productsToEdit[i].category) { @case (0){
+            <p-tag severity="info">Poisson</p-tag> } @case (1) {
+            <p-tag severity="success">Coquillage</p-tag>
+            } @default { <p-tag>Crustace</p-tag> } }
+          </td>
+          <td class="text-right">{{ productsToEdit[i].stock }}</td>
+          <td class="text-right">{{ productsToEdit[i].unit_sold }}</td>
+          <td class="text-center">
+            <p-inputSwitch [(ngModel)]="productsToEdit[i].sale" />
+          </td>
+          <td>{{ productsToEdit[i].comments }}</td>
+          <td>
+            <div class="flex align-items-center">
+              <p-inputNumber
+                (onInput)="bulkEdits(i, $event.value)"
+                #newStock
+              ></p-inputNumber>
+              <p-button
+                (click)="editStock(i, newStock.value!)"
+                text
+                icon="pi pi-check"
+                severity="success"
+              />
+              <p-button
+                (click)="cancelEdition(i)"
+                text
+                icon="pi pi-times"
+                severity="danger"
+              />
+            </div>
+          </td>
+        </tr>
+        }
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>
+<p-toast />
