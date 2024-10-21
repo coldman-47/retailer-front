@@ -1,11 +1,10 @@
-<div class="">
-  <p-tabMenu
-    [model]="types"
-    [activeItem]="selectedType"
-    (activeItemChange)="selectCategory($event)"
-  />
-
-  <p-card>
+<div class="p-3">
+  <p-card header="Produits">
+    <p-tabMenu
+      [model]="types"
+      [activeItem]="selectedType"
+      (activeItemChange)="selectCategory($event)"
+    />
     <p-table
       [value]="products | filter : category"
       styleClass="p-datatable-striped"
@@ -94,14 +93,32 @@
             <p-inputSwitch [(ngModel)]="productsToEdit[i].sale" />
           </td>
           <td>{{ productsToEdit[i].comments }}</td>
-          <td>
+          <td class="px-0">
             <div class="flex align-items-center">
+              <p-selectButton
+                [options]="stateOptions"
+                [(ngModel)]="productsToEdit[i].op"
+                optionLabel="label"
+                optionValue="value"
+                class="mr-2"
+                #type
+              />
               <p-inputNumber
+                [disabled]="!type.value"
+                min="0"
+                placeholder="Quantité"
                 (onInput)="bulkEdits(i, $event.value)"
                 #newStock
+                class="mr-2"
+              ></p-inputNumber>
+              <p-inputNumber
+                min="0.1"
+                placeholder="Prix"
+                (onInput)="bulkEdits(i, $event.value, true)"
+                #price
               ></p-inputNumber>
               <p-button
-                (click)="editStock(i, newStock.value!)"
+                (click)="editStock(i)"
                 text
                 icon="pi pi-check"
                 severity="success"

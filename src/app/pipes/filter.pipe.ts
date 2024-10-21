@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class FilterPipe implements PipeTransform {
   transform(array: any[], category?: number): any[] {
-    return category !== undefined
+    return (category !== undefined && category !== null)
       ? array.filter((item) => item.category === category)
       : array;
   }
