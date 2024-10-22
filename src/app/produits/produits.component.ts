@@ -1,18 +1,22 @@
 import { JsonPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MenuItem, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
+import { InputNumberModule } from 'primeng/inputnumber';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { KnobModule } from 'primeng/knob';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { TableModule } from 'primeng/table';
-import { TagModule } from 'primeng/tag';
-import { ProduitsService } from '../services/produits/produits.service';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { TabMenuModule } from 'primeng/tabmenu';
-import { MenuItem, MessageService } from 'primeng/api';
-import { FilterPipe } from '../pipes/filter.pipe';
+import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
+import { Operation } from '../models/operation';
+import { Product } from '../models/product';
+import { FilterPipe } from '../pipes/filter.pipe';
+import { OperationsService } from '../services/operations/operations.service';
+import { ProduitsService } from '../services/produits/produits.service';
 
 @Component({
   selector: 'app-produits',
@@ -30,13 +34,14 @@ import { ToastModule } from 'primeng/toast';
     TabMenuModule,
     FilterPipe,
     ToastModule,
+    SelectButtonModule,
   ],
   templateUrl: './produits.component.html',
   styleUrl: './produits.component.scss',
   providers: [MessageService],
 })
 export class ProduitsComponent implements OnInit {
-  products: any[] = [];
+  products: Product[] = [];
   types = [
     { label: 'Tout' },
     { label: 'Poissons', category: 0 },
@@ -45,16 +50,21 @@ export class ProduitsComponent implements OnInit {
   ];
   selectedType!: MenuItem;
   category?: number;
-  productsToEdit: any = [];
+  productsToEdit: Product[] = [];
+  stateOptions: any[] = [
+    { label: 'Achat', value: 'purchase' },
+    { label: 'Vente', value: 'sale' },
+  ];
 
   constructor(
     private produitService: ProduitsService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private operationService: OperationsService
   ) {}
 
   ngOnInit(): void {
     this.produitService.getProducts().subscribe(
-      (products: any) =>
+      (products: Product[]) =>
         (this.products = products.map((product: any) => {
           product.edit = false;
           return product;
@@ -71,30 +81,46 @@ export class ProduitsComponent implements OnInit {
     this.category = e.category;
   }
 
-  async editStock(id: number, stock: number) {
-    this.productsToEdit[id].stock = this.products[id].stock + stock;
-    this.products[id] = await this.produitService.updateProducts(
-      this.productsToEdit[id]
+  async editStock(i: number) {
+    this.products[i] = <Product | any>(
+      await this.produitService.updateProducts(this.productsToEdit[i])
     );
     this.messageService.add({
       severity: 'success',
       summary: 'Opération réussie',
       detail: 'Le produit a bien été mis à jour.',
     });
-    delete this.productsToEdit[id];
-    this.products[id].edit = false;
+    delete this.productsToEdit[i];
+    this.products[i].edit = false;
   }
 
-  bulkEdits(id: number, stock: any) {
-    this.productsToEdit[id].stock = this.products[id].stock + stock;
+  bulkEdits(id: number, value: any, price?: boolean) {
+    if (price) this.productsToEdit[id].price = value;
+    else {
+      if (this.productsToEdit[id].op === 'sale') value = -value;
+      this.productsToEdit[id].stock = this.products[id].stock + value;
+      this.productsToEdit[id].quantity = value;
+    }
   }
 
   addProductToEdit(i: number, product: any) {
+    // this.products.find((product) => product.id === i);
     this.productsToEdit[i] = { ...product };
+    this.productsToEdit[i].op = 'sale';
   }
 
   async saveEdits() {
-    await this.produitService.updateProducts(this.productsToEdit.filter(Boolean));
+    this.productsToEdit.forEach(async element => {
+      const operation: Operation = {
+        product: element,
+        price: element.price,
+        quantity: element.quantity!
+      };
+      await this.operationService.createOperation(operation);
+    });
+    await this.produitService.updateProducts(
+      this.productsToEdit.filter(Boolean)
+    );
     this.messageService.add({
       severity: 'success',
       summary: 'Opération réussie',

@@ -1,0 +1,10 @@
+:host ::ng-deep {
+  .p-datatable-footer .p-card-title {
+    text-align: right;
+  }
+
+  .p-card-content{
+    max-height: 35em;
+    overflow-y: auto;
+  }
+}

@@ -1,0 +1,12 @@
+:host ::ng-deep {
+  .login {
+    p-button,
+    p-button button {
+      width: 226px;
+    }
+  }
+
+  .p-dialog-mask {
+    backdrop-filter: blur(10px);
+  }
+}

@@ -1,1 +1,53 @@
 <app-layout></app-layout>
+<p-scrollTop />
+<p-dialog
+  [(visible)]="visible"
+  modal="modal"
+  closable="false"
+  [blockScroll]="true"
+>
+@if(!register){
+    <p-card class="fadeoutdown animation-duration-1000 login" header="Connexion">
+      <div class="flex flex-column align-items-center">
+        <input
+          [(ngModel)]="credentials.username"
+          class="mb-3"
+          pInputText
+          placeholder="Nom d'utilisateur"
+        />
+        <p-password
+          [(ngModel)]="credentials.password"
+          placeholder="Mot de passe"
+          class="mb-3"
+          [feedback]="true"
+        />
+      <a  class="text-right my-3">Mot de passe oublié?</a>
+        <p-button class="w-100 mb-3" (onClick)="login()" label="Se connecter"></p-button>
+        <div class="flex gap-5"><span>Pas de compte?</span> <a href="">Inscrivez-vous!</a></div>
+      </div>
+    </p-card>
+}
+@else {
+    <p-card class="fadeoutdown animation-duration-1000" header="Connexion">
+      <div class="flex flex-column align-items-center">
+        <input
+          [(ngModel)]="credentials.username"
+          class="mb-3"
+          pInputText
+          placeholder="Nom d'utilisateur"
+        />
+        <p-password
+          [(ngModel)]="credentials.password"
+          placeholder="Mot de passe"
+          class="mb-3"
+          [feedback]="false"
+        />
+      <a  class="text-right my-3">Mot de passe oublié?</a>
+        <p-button class="w-100 mb-3" (onClick)="login()" label="Se connecter"></p-button>
+        <div class="flex gap-5"><span>Pas de compte?</span> <a href="">Inscrivez-vous!</a></div>
+      </div>
+    </p-card>
+
+}
+</p-dialog>
+<p-toast></p-toast>

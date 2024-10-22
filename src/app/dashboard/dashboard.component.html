@@ -1,0 +1,84 @@
+<div class="p-3">
+  <p-card header="Historique des transactions">
+    <p-table
+      [tableStyle]="{ 'max-height': '20rem' }"
+      styleClass="p-datatable-striped"
+      [value]="operations | filter : categoryOption"
+      [tableStyle]="{ 'min-width': '50rem' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Produit</th>
+          <th>Nature</th>
+          <th pSortableColumn="quantity">Quantité</th>
+          <th pSortableColumn="price">Prix</th>
+          <th>Date</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-operation>
+        <tr>
+          <td>{{ operation.product.name }}</td>
+          <td>
+            @if(operation.quantity < 0){
+            <p-tag severity="info">Vente</p-tag>
+            } @else if (operation.quantity > 0) {
+            <p-tag severity="success">Achat</p-tag>
+            } @else { <p-tag>Peremption</p-tag> }
+          </td>
+          <td>{{ abs(operation.quantity) }}</td>
+          <td>{{ operation.price }}</td>
+          <td>{{ operation.created_at | date }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="summary"> </ng-template>
+    </p-table>
+    <ng-template pTemplate="subheader">
+    </ng-template>
+  </p-card>
+  <p-card header="Chiffre d'affaire">
+    <div class="flex align-items-center gap-3">
+      <p-selectButton
+        [(ngModel)]="categoryOption"
+        optionValue="category"
+        pRipple
+        [options]="categories"
+      ></p-selectButton>
+      <h3 class="ml-auto">
+        {{
+          chiffreDaffaire(operations | filter : categoryOption)
+            | currency : "€ "
+        }}
+      </h3>
+    </div>
+  </p-card>
+  <div class="my-3">  
+  <p-card header="Métriques">
+    <ng-template pTemplate="subheader">
+      <p-dropdown
+        [(ngModel)]="year"
+        [options]="years"
+        (ngModelChange)="getChartDataByYear()"
+      ></p-dropdown>
+      <p-dropdown [options]="options" optionLabel="label"></p-dropdown>
+    </ng-template>
+    <div class="card flex">
+      <div class="col">
+        <p-chart
+          [type]="'bar'"
+          [data]="chartDataByYear"
+          [options]="basicOptions"
+          [height]="'30em'"
+        ></p-chart>
+      </div>
+      <p-divider layout="vertical"></p-divider>
+      <div class="col">
+        <p-chart
+          [type]="'pie'"
+          [data]="chartData"
+          [options]="basicOptions"
+          [height]="'30em'"
+        ></p-chart>
+      </div>
+    </div>
+  </p-card>
+</div>
