@@ -82,12 +82,6 @@ export class ProduitsComponent implements OnInit {
   }
 
   async editStock(i: number) {
-    const operation: Operation = {
-      product: this.productsToEdit[i],
-      price: this.productsToEdit[i].price,
-      quantity: this.productsToEdit[i].quantity!
-    };
-    await this.operationService.createOperation(operation);
     this.products[i] = <Product | any>(
       await this.produitService.updateProducts(this.productsToEdit[i])
     );
@@ -116,6 +110,14 @@ export class ProduitsComponent implements OnInit {
   }
 
   async saveEdits() {
+    this.productsToEdit.forEach(async element => {
+      const operation: Operation = {
+        product: element,
+        price: element.price,
+        quantity: element.quantity!
+      };
+      await this.operationService.createOperation(operation);
+    });
     await this.produitService.updateProducts(
       this.productsToEdit.filter(Boolean)
     );

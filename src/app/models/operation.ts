@@ -5,6 +5,6 @@ export interface Operation {
   product: Product | number;
   quantity: number;
   price: number;
-  createdAt?: Date;
+  created_at?: Date;
   category?: number;
 }
