@@ -16,27 +16,29 @@ export class AuthInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const tokens = JSON.parse(<string>localStorage.getItem('token'));
-    const { access, refresh } = tokens;
-    if (tokens) {
+    if (localStorage.getItem('token')) {
+      const tokens = JSON.parse(<string>localStorage.getItem('token'));
+      const { access, refresh } = tokens;
       req = req.clone({
         headers: req.headers.set('Authorization', access),
       });
+      return next.handle(req).pipe(
+        catchError((error) => {
+          return this.authService.refreshToken().pipe(
+            switchMap((data: any) => {
+              const token = { refresh, access: data.access };
+              localStorage.setItem('token', JSON.stringify(token));
+              return next.handle(
+                req.clone({
+                  headers: req.headers.set('Authorization', tokens.access),
+                })
+              );
+            })
+          );
+        })
+      );
+    }else{
+      return next.handle(req)
     }
-    return next.handle(req).pipe(
-      catchError((error) => {
-        return this.authService.refreshToken().pipe(
-          switchMap((data: any) => {
-            const token = { refresh, access: data.access };
-            localStorage.setItem('token', JSON.stringify(token));
-            return next.handle(
-              req.clone({
-                headers: req.headers.set('Authorization', tokens.access),
-              })
-            );
-          })
-        );
-      })
-    );
   }
 }
